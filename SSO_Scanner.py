@@ -141,9 +141,11 @@ class BurpExtender(IBurpExtender, IHttpListener, ITab, IContextMenuFactory):
         btnRep  = JButton("Save HTML Report", actionPerformed=self.save_report)
         btnClr  = JButton("Clear Results",     actionPerformed=self.clear_all)
         top.add(title); top.add(btnRep); top.add(btnClr)
-        self.model = DefaultTableModel(
-            ["Check ID","Test Case","Target","Status","Detail"], 0) {
-            "isCellEditable": lambda r,c: False }
+        class NonEditableModel(DefaultTableModel):
+            def isCellEditable(self, row, column):
+                return False
+
+        self.model = NonEditableModel(["Check ID","Test Case","Target","Status","Detail"], 0)
         self.table = JTable(self.model)
         self.table.setAutoCreateRowSorter(True)
         self.table.getColumnModel().getColumn(4).setPreferredWidth(500)
@@ -588,8 +590,11 @@ class BurpExtender(IBurpExtender, IHttpListener, ITab, IContextMenuFactory):
         return items
 
     def run_active_async(self, msgs):
-        t = Thread(Runnable() {
-            "run": lambda: [self.run_active(m) for m in msgs] })
+        class ActiveTask(Runnable):
+            def run(task_self):
+                for m in msgs:
+                    self.run_active(m)
+        t = Thread(ActiveTask())
         t.start()
 
     def run_active(self, msg):
