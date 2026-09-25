@@ -983,153 +983,154 @@ class BurpExtender(IBurpExtender, IHttpListener, ITab, IContextMenuFactory):
         checked_ids = set(r["id"].split("-")[0] for r in done)
 
         h = []
-        h.append("<!DOCTYPE html><html><head><meta charset='utf-8'>")
-        h.append("<title>SSO Security Assessment Report</title>")
+        h.append("<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'>")
+        h.append("<meta name='viewport' content='width=device-width, initial-scale=1.0'>")
+        h.append("<title>Offensive Security Assessment Report — SSO & OAuth 2.0 / OIDC Audit</title>")
         h.append("<style>")
-        h.append("body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;margin:0;padding:32px;color:#1f2937;background-color:#f9fafb;line-height:1.6}")
-        h.append(".container{max-width:1100px;margin:0 auto;background:#ffffff;padding:40px;border-radius:12px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1),0 2px 4px -1px rgba(0,0,0,0.06)}")
-        h.append("h1{font-size:26px;color:#111827;margin-top:0;margin-bottom:8px;font-weight:700}")
-        h.append("h2{font-size:20px;color:#111827;margin-top:36px;margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid #e5e7eb;font-weight:600}")
-        h.append("h3{font-size:16px;color:#dc2626;margin-top:24px;margin-bottom:12px;font-weight:600}")
-        h.append(".subtitle{color:#6b7280;font-size:14px;margin-bottom:28px}")
-        h.append("table{border-collapse:collapse;width:100%;margin-bottom:24px;font-size:13px}")
-        h.append("th{background-color:#f3f4f6;color:#374151;font-weight:600;text-align:left;padding:10px 12px;border:1px solid #e5e7eb}")
-        h.append("td{padding:10px 12px;border:1px solid #e5e7eb;vertical-align:top}")
-        h.append(".badge-pass{background-color:#def7ec;color:#03543f;padding:2px 8px;border-radius:4px;font-weight:600;display:inline-block}")
-        h.append(".badge-fail{background-color:#fde8e8;color:#9b1c1c;padding:2px 8px;border-radius:4px;font-weight:600;display:inline-block}")
-        h.append(".badge-info{background-color:#feecdc;color:#b45309;padding:2px 8px;border-radius:4px;font-weight:600;display:inline-block}")
-        h.append(".badge-not{background-color:#f3f4f6;color:#6b7280;padding:2px 8px;border-radius:4px;font-weight:600;display:inline-block}")
-        h.append(".summary-cards{display:flex;gap:16px;margin-bottom:32px}")
-        h.append(".card{flex:1;padding:16px;border-radius:8px;background:#f9fafb;border:1px solid #e5e7eb;text-align:center}")
-        h.append(".card .num{font-size:24px;font-weight:700;margin-bottom:4px}")
-        h.append(".card .label{font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em}")
-        h.append("pre,code{font-family:ui-monospace,SFMono-Regular,Consolas,'Liberation Mono',Menlo,monospace;font-size:12px}")
-        h.append("pre{background:#1e293b;color:#f8fafc;padding:14px;border-radius:6px;overflow-x:auto;margin:12px 0}")
-        h.append(".finding-box{background-color:#fff5f5;border-left:4px solid #ef4444;padding:16px 20px;border-radius:0 8px 8px 0;margin-bottom:24px}")
-        h.append(".remediation{background-color:#f0fdf4;border-left:4px solid #22c55e;padding:12px 16px;border-radius:0 6px 6px 0;margin-top:12px;font-size:13px}")
-        h.append("</style></head><body><div class='container'>")
+        h.append(":root{--primary:#0f172a;--primary-light:#1e293b;--accent:#2563eb;--danger:#dc2626;--danger-bg:#fef2f2;--warning:#d97706;--warning-bg:#fffbeb;--success:#16a34a;--success-bg:#f0fdf4;--neutral-bg:#f8fafc;--border:#e2e8f0;--text-main:#0f172a;--text-muted:#64748b;}")
+        h.append("*{box-sizing:border-box;margin:0;padding:0;}")
+        h.append("body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background-color:#f1f5f9;color:var(--text-main);line-height:1.6;padding:40px 20px;}")
+        h.append(".report-container{max-width:1150px;margin:0 auto;background:#ffffff;border-radius:12px;box-shadow:0 10px 25px -5px rgba(0,0,0,0.05);overflow:hidden;border:1px solid var(--border);}")
+        h.append(".report-header{background:linear-gradient(135deg,var(--primary) 0%,var(--primary-light) 100%);color:#ffffff;padding:40px 48px;border-bottom:4px solid var(--accent);}")
+        h.append(".report-header h1{font-size:28px;font-weight:700;letter-spacing:-0.02em;margin-bottom:8px;}")
+        h.append(".report-header .subtitle{font-size:15px;color:#94a3b8;font-weight:400;}")
+        h.append(".meta-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;margin-top:28px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.1);font-size:13px;}")
+        h.append(".meta-item .label{color:#94a3b8;text-transform:uppercase;font-size:11px;font-weight:600;letter-spacing:0.05em;}")
+        h.append(".meta-item .value{color:#f8fafc;font-weight:500;margin-top:2px;}")
+        h.append(".report-body{padding:48px;}")
+        h.append("section{margin-bottom:48px;}")
+        h.append("h2{font-size:20px;font-weight:700;color:var(--primary);margin-bottom:20px;padding-bottom:8px;border-bottom:2px solid var(--border);display:flex;align-items:center;gap:10px;}")
+        h.append("p{margin-bottom:14px;font-size:14px;color:#334155;}")
+        h.append(".metrics-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px;}")
+        h.append(".card{background:var(--neutral-bg);border:1px solid var(--border);border-radius:8px;padding:20px;text-align:center;}")
+        h.append(".card .number{font-size:28px;font-weight:800;line-height:1;margin-bottom:6px;}")
+        h.append(".card .title{font-size:12px;font-weight:600;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.04em;}")
+        h.append("table{width:100%;border-collapse:collapse;font-size:13.5px;margin-bottom:24px;}")
+        h.append("th{background-color:var(--neutral-bg);color:var(--primary);font-weight:600;text-align:left;padding:12px 16px;border:1px solid var(--border);}")
+        h.append("td{padding:12px 16px;border:1px solid var(--border);vertical-align:top;}")
+        h.append("tr:nth-child(even) td{background-color:#fafafa;}")
+        h.append(".badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:9999px;font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.03em;}")
+        h.append(".badge-fail{background-color:var(--danger-bg);color:var(--danger);border:1px solid #fecaca;}")
+        h.append(".badge-pass{background-color:var(--success-bg);color:var(--success);border:1px solid #bbf7d0;}")
+        h.append(".badge-medium{background-color:var(--warning-bg);color:var(--warning);border:1px solid #fde68a;}")
+        h.append(".badge-low{background-color:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;}")
+        h.append(".badge-unchecked{background-color:#f1f5f9;color:#64748b;border:1px solid #cbd5e1;}")
+        h.append(".finding-card{border:1px solid var(--border);border-radius:8px;margin-bottom:32px;overflow:hidden;background:#ffffff;}")
+        h.append(".finding-header{background:var(--neutral-bg);padding:16px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}")
+        h.append(".finding-title{font-size:16px;font-weight:700;color:var(--primary);}")
+        h.append(".finding-content{padding:24px;}")
+        h.append(".info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;background:var(--neutral-bg);padding:14px 18px;border-radius:6px;font-size:12.5px;margin-bottom:18px;border:1px solid var(--border);}")
+        h.append(".info-grid div span{color:var(--text-muted);display:block;font-size:11px;text-transform:uppercase;font-weight:600;}")
+        h.append(".info-grid div strong{color:var(--primary);}")
+        h.append("pre,code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono',monospace;font-size:12.5px;}")
+        h.append("pre{background-color:#0f172a;color:#f8fafc;padding:16px 20px;border-radius:6px;overflow-x:auto;margin:14px 0;border:1px solid #334155;line-height:1.5;}")
+        h.append("code.inline{background-color:var(--neutral-bg);color:#0f172a;padding:2px 6px;border-radius:4px;border:1px solid var(--border);}")
+        h.append(".remediation-box{background-color:var(--success-bg);border-left:4px solid var(--success);padding:18px 20px;border-radius:0 6px 6px 0;margin-top:18px;}")
+        h.append(".remediation-box h4{font-size:13.5px;font-weight:700;color:#14532d;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.03em;}")
+        h.append(".remediation-box p{color:#166534;margin-bottom:0;font-size:13.5px;}")
+        h.append(".footer{text-align:center;padding:24px;border-top:1px solid var(--border);font-size:12px;color:var(--text-muted);background-color:var(--neutral-bg);}")
+        h.append("</style></head><body>")
         
-        # Title & Meta
-        h.append("<h1>SSO Penetration Test Report</h1>")
-        h.append("<div class='subtitle'>Generated by Burp SSO Scanner &middot; %s</div>"
-                 % datetime.datetime.now().strftime("%Y-%m-%d %H:%M"))
-        
+        h.append("<div class='report-container'>")
+        h.append("<header class='report-header'>")
+        h.append("<h1>Offensive Security Assessment Report</h1>")
+        h.append("<div class='subtitle'>Single Sign-On (SSO) & OAuth 2.0 / OpenID Connect Security Audit</div>")
+        h.append("<div class='meta-grid'>")
+        h.append("<div class='meta-item'><div class='label'>Assessment Tool</div><div class='value'>Burp Suite SSO Scanner</div></div>")
+        h.append("<div class='meta-item'><div class='label'>Protocols Audited</div><div class='value'>SAML 2.0 / OAuth 2.0 / OIDC</div></div>")
+        h.append("<div class='meta-item'><div class='label'>Date & Time</div><div class='value'>%s</div></div>" % datetime.datetime.now().strftime("%B %d, %Y - %H:%M UTC"))
+        h.append("<div class='meta-item'><div class='label'>Total Scanned Target(s)</div><div class='value'>%d Target(s)</div></div>" % len(set(r["target"] for r in done) if done else [1]))
+        h.append("</div></header>")
+
+        h.append("<div class='report-body'>")
+
         # Summary Cards
-        h.append("<div class='summary-cards'>")
-        h.append("<div class='card'><div class='num' style='color:#03543f'>%d</div><div class='label'>Passed Checks</div></div>" % len(passes))
-        h.append("<div class='card'><div class='num' style='color:#9b1c1c'>%d</div><div class='label'>Failed Checks</div></div>" % len(fails))
-        h.append("<div class='card'><div class='num' style='color:#b45309'>%d</div><div class='label'>Info / Warnings</div></div>" % len(infos))
-        h.append("<div class='card'><div class='num' style='color:#6b7280'>%d</div><div class='label'>Manual / Unchecked</div></div>" % (len(CATALOG) - len(checked_ids)))
+        h.append("<section><h2>📊 Assessment Executive Summary</h2>")
+        h.append("<div class='metrics-cards'>")
+        h.append("<div class='card'><div class='number' style='color:var(--success);'>%d</div><div class='title'>Passed Checks</div></div>" % len(passes))
+        h.append("<div class='card'><div class='number' style='color:var(--danger);'>%d</div><div class='title'>Failed Checks</div></div>" % len(fails))
+        h.append("<div class='card'><div class='number' style='color:var(--warning);'>%d</div><div class='title'>Warnings / Errors</div></div>" % len(infos))
+        h.append("<div class='card'><div class='number' style='color:var(--text-muted);'>%d</div><div class='title'>Manual Verification</div></div>" % (len(CATALOG) - len(checked_ids)))
         h.append("</div>")
 
-        # ---------------------------------------------------- 1. Exec Summary Table
-        h.append("<h2>📊 Scan Results Summary</h2>")
-        h.append("<table><tr><th style='width:25%'>Test</th><th style='width:25%'>Target</th><th style='width:12%'>Result</th><th style='width:38%'>What it means</th></tr>")
-        
+        # Summary Table
+        h.append("<table><thead><tr><th style='width:28%;'>Test Case</th><th style='width:32%;'>Target Endpoint</th><th style='width:12%;'>Status</th><th style='width:28%;'>Technical Finding Summary</th></tr></thead><tbody>")
         if done:
             for r in done:
-                res_badge = "<span class='badge-pass'>✅ PASS</span>"
+                badge = "<span class='badge badge-pass'>✅ PASS</span>"
                 if r["status"] == "FAIL":
-                    res_badge = "<span class='badge-fail'>❌ FAIL</span>"
+                    badge = "<span class='badge badge-fail'>❌ FAIL</span>"
                 elif r["status"] in ("INFO","ERROR"):
-                    res_badge = "<span class='badge-info'>⚠️ %s</span>" % r["status"]
-                h.append("<tr><td><b>%s</b></td><td><code>%s</code></td><td>%s</td><td>%s</td></tr>"
-                         % (esc(r["name"]), esc(r["target"]), res_badge, esc(r["detail"])))
+                    badge = "<span class='badge badge-medium'>⚠️ %s</span>" % r["status"]
+                h.append("<tr><td><strong>%s</strong></td><td><code class='inline'>%s</code></td><td>%s</td><td>%s</td></tr>"
+                         % (esc(r["name"]), esc(r["target"]), badge, esc(r["detail"])))
         else:
-            h.append("<tr><td colspan='4'>No active or passive scan results captured yet.</td></tr>")
-        h.append("</table>")
+            h.append("<tr><td colspan='4'>No scan results recorded yet.</td></tr>")
+        h.append("</tbody></table></section>")
 
-        # ---------------------------------------------------- 2. Detailed Breakdown of Failures
+        # Detailed Findings
         if fails:
-            h.append("<h2>🔴 Detailed Findings & Technical Analysis</h2>")
+            h.append("<section><h2>🔴 Technical Findings & Impact Analysis</h2>")
             idx = 1
             for r in fails:
                 cid = r["id"].split("-")[0]
-                h.append("<div class='finding-box'>")
-                h.append("<h3>🔴 %d. %s (%s)</h3>" % (idx, esc(r["name"]), esc(r["target"])))
-                h.append("<p><b>Scanner Evidence:</b> <code>%s</code></p>" % esc(r["detail"]))
-                
-                # Tailored guidance per vulnerability category
-                if "3.2.1" in cid:
-                    h.append("<p>The OAuth authorization request does not include a cryptographically random <code>state</code> parameter.</p>")
-                    h.append("<pre>GET /authorize?\n    client_id=...\n    &redirect_uri=...\n    &response_type=code\n    &state=&lt;random-value&gt; HTTP/1.1\nHost: %s</pre>" % esc(r["target"]))
-                    h.append("<p><b>Security Concern:</b> The <code>state</code> parameter provides CSRF protection during authorization flows. Without it, an attacker can perform <b>Login CSRF</b> to link a victim session to an attacker-controlled account.</p>")
-                    h.append("<div class='remediation'><b>Recommended Remediation:</b> Generate a high-entropy, unpredictable <code>state</code> value per transaction and validate it server-side upon receiving the authorization callback.</div>")
-                elif "2.3.6" in cid:
-                    h.append("<p>The authorization endpoint issued a code without enforcing Proof Key for Code Exchange (PKCE).</p>")
-                    h.append("<pre>code_challenge=&lt;BASE64URL&gt;\ncode_challenge_method=S256</pre>")
-                    h.append("<p><b>Security Concern:</b> Unenforced PKCE on public OAuth clients allows attackers to exchange intercepted authorization codes directly for tokens.</p>")
-                    h.append("<div class='remediation'><b>Recommended Remediation:</b> Mandate <code>code_challenge</code> with <code>S256</code> method for all authorization requests and verify <code>code_verifier</code> at the <code>/token</code> endpoint.</div>")
-                elif "4.4.1" in cid:
-                    h.append("<p>One or more set cookies lack essential security attributes (<code>HttpOnly</code>, <code>Secure</code>, or <code>SameSite</code>).</p>")
-                    h.append("<pre>Set-Cookie: %s; Secure; HttpOnly; SameSite=Lax</pre>" % esc(r["detail"].partition("'")[2].partition("'")[0] or "session_id"))
-                    h.append("<p><b>Security Concern:</b> Missing security flags increase exposure to XSS cookie theft (missing <code>HttpOnly</code>), HTTP plain-text leakage (missing <code>Secure</code>), and CSRF attacks (missing <code>SameSite</code>).</p>")
-                    h.append("<div class='remediation'><b>Recommended Remediation:</b> Enforce <code>Secure</code>, <code>HttpOnly</code>, and explicit <code>SameSite=Lax</code> or <code>Strict</code> directives on all sensitive application cookies.</div>")
-                elif "2.3.2" in cid:
-                    h.append("<p>The identity provider or service provider accepted a JWT token with algorithm set to <code>none</code>.</p>")
-                    h.append("<p><b>Security Concern:</b> Allows signature forgery and arbitrary claim spoofing, leading to complete account takeover.</p>")
-                    h.append("<div class='remediation'><b>Recommended Remediation:</b> Restrict accepted JWT algorithms to explicit secure options (e.g. RS256/ES256) and reject <code>none</code> algorithm tokens server-side.</div>")
-                elif "2.3.1" in cid:
-                    h.append("<p>The application accepted an RS256 token signed using HMAC-SHA256 with the public RSA key as the secret key.</p>")
-                    h.append("<p><b>Security Concern:</b> Enables signature spoofing using publicly accessible RSA key material.</p>")
-                    h.append("<div class='remediation'><b>Recommended Remediation:</b> Strict separation of asymmetric and symmetric verification logic based on explicit client/token configuration.</div>")
-                else:
-                    h.append("<p>This security check failed during scanning and requires technical remediation and verification.</p>")
-                    h.append("<div class='remediation'><b>Recommended Remediation:</b> Review application logic against security baseline standards (OWASP / RFC specifications) for check ID <code>%s</code>.</div>" % esc(cid))
-                
+                h.append("<div class='finding-card'>")
+                h.append("<div class='finding-header'><div class='finding-title'>Finding %d — %s</div><span class='badge badge-fail'>FAIL</span></div>" % (idx, esc(r["name"])))
+                h.append("<div class='finding-content'>")
+                h.append("<div class='info-grid'>")
+                h.append("<div><span>Check ID</span><strong>%s</strong></div>" % esc(r["id"]))
+                h.append("<div><span>Target System</span><strong>%s</strong></div>" % esc(r["target"]))
+                h.append("<div><span>Scanner Evidence</span><strong>%s</strong></div>" % esc(r["detail"]))
                 h.append("</div>")
-                idx += 1
 
-        # ---------------------------------------------------- 3. Pentest Classification Table
-        if fails:
-            h.append("<h2>📌 Penetration Test Classification</h2>")
-            h.append("<p>Recommended documentation structure for formal security assessment reporting:</p>")
-            h.append("<table><tr><th>Finding Title</th><th>Potential Impact</th><th>Suggested Severity</th></tr>")
-            
-            f_set = set()
-            for r in fails:
-                cid = r["id"].split("-")[0]
-                if cid in f_set: continue
-                f_set.add(cid)
-                
                 if "3.2.1" in cid:
-                    h.append("<tr><td><b>Finding 1 — Missing OAuth <code>state</code> Parameter</b></td><td>OAuth authorization-flow CSRF / login-flow manipulation</td><td><span class='badge-info'>Medium</span></td></tr>")
+                    h.append("<p><strong>Vulnerability Description:</strong> The OAuth 2.0 authorization request does not supply an unpredictable <code class='inline'>state</code> parameter.</p>")
+                    h.append("<pre>GET /authorize?client_id=CLIENT_ID&redirect_uri=https://%s/callback&response_type=code HTTP/1.1\nHost: %s</pre>" % (esc(r["target"]), esc(r["target"])))
+                    h.append("<p><strong>Security Impact:</strong> Without a validated <code class='inline'>state</code> token bound to the browser session, an attacker can execute a <strong>Login CSRF</strong> attack to link a victim session to an attacker-controlled account.</p>")
+                    h.append("<div class='remediation-box'><h4>Recommended Remediation</h4><p>Generate an unguessable, high-entropy cryptographic token per transaction. Bind it to the user's browser session and validate it server-side upon receiving the authorization callback.</p></div>")
                 elif "2.3.6" in cid:
-                    h.append("<tr><td><b>Finding 2 — PKCE Not Enforced for OAuth Authorization Flow</b></td><td>Authorization-code interception/replay depending on client architecture</td><td><span class='badge-info'>Medium</span></td></tr>")
+                    h.append("<p><strong>Vulnerability Description:</strong> The authorization server issued an authorization code without enforcing Proof Key for Code Exchange (PKCE, RFC 7636).</p>")
+                    h.append("<pre>code_challenge=&lt;BASE64URL&gt;\ncode_challenge_method=S256</pre>")
+                    h.append("<p><strong>Security Impact:</strong> Unenforced PKCE on public OAuth clients allows attackers who intercept an authorization code to exchange it directly for tokens without knowing a secret verifier.</p>")
+                    h.append("<div class='remediation-box'><h4>Recommended Remediation</h4><p>Mandate <code class='inline'>code_challenge</code> with <code class='inline'>code_challenge_method=S256</code> on all authorization requests and enforce <code class='inline'>code_verifier</code> checking at the <code class='inline'>/token</code> endpoint.</p></div>")
                 elif "4.4.1" in cid:
-                    h.append("<tr><td><b>Finding 3 — Missing Security Attributes on Sensitive Cookie</b></td><td>Increased exposure of cookie to client-side scripts, non-TLS transport, or cross-site requests</td><td><span class='badge-not'>Low–Medium</span></td></tr>")
-                elif "2.3.2" in cid or "2.3.1" in cid:
-                    h.append("<tr><td><b>Finding — JWT Signature Verification Bypass (%s)</b></td><td>Arbitrary identity impersonation / complete authentication bypass</td><td><span class='badge-fail'>High / Critical</span></td></tr>" % esc(cid))
+                    h.append("<p><strong>Vulnerability Description:</strong> The application sets cookies without complete browser defense attributes (<code class='inline'>HttpOnly</code>, <code class='inline'>Secure</code>, <code class='inline'>SameSite</code>).</p>")
+                    h.append("<pre>Set-Cookie: %s; Path=/; Secure; HttpOnly; SameSite=Lax</pre>" % esc(r["detail"].partition("'")[2].partition("'")[0] or "session_cookie"))
+                    h.append("<p><strong>Security Impact:</strong> Increases risk of XSS-based cookie theft (missing <code class='inline'>HttpOnly</code>), plain-text HTTP transport exposure (missing <code class='inline'>Secure</code>), and CSRF attacks (missing <code class='inline'>SameSite</code>).</p>")
+                    h.append("<div class='remediation-box'><h4>Recommended Remediation</h4><p>Configure cookie issuance to strictly include <code class='inline'>Secure</code>, <code class='inline'>HttpOnly</code>, and explicit <code class='inline'>SameSite=Lax</code> or <code class='inline'>Strict</code> directives.</p></div>")
                 else:
-                    h.append("<tr><td><b>Finding — SSO Security Requirement Failure (%s)</b></td><td>Potential security boundary or authorization policy bypass</td><td><span class='badge-info'>Medium</span></td></tr>" % esc(r["name"]))
-            h.append("</table>")
+                    h.append("<p><strong>Vulnerability Description:</strong> Security requirement failure observed during scanner evaluation.</p>")
+                    h.append("<div class='remediation-box'><h4>Recommended Remediation</h4><p>Review endpoint handler configuration against standard security specification benchmarks (RFC 6749 / SAML 2.0 Core).</p></div>")
+                
+                h.append("</div></div>")
+                idx += 1
+            h.append("</section>")
 
-        # ---------------------------------------------------- 4. Full Checklist Audit Matrix
-        h.append("<h2>📋 Complete Audit Matrix & Test Coverage</h2>")
+        # Full Audit Matrix Table
+        h.append("<section><h2>📋 Complete Audit Matrix & Test Coverage</h2>")
         cur_stage = None
-        h.append("<table><tr><th>Check ID</th><th>Test Case</th><th>Checked?</th><th>Result</th><th>Target</th><th>Evidence / Status</th></tr>")
+        h.append("<table><thead><tr><th>Check ID</th><th>Test Case</th><th>Checked?</th><th>Result</th><th>Target Domain</th><th>Evidence / Status</th></tr></thead><tbody>")
         for cid, name in CATALOG:
             stg = cid.split(".")[0]
             if cid.startswith("XSW"): stg = "2"
             if stg != cur_stage:
                 cur_stage = stg
-                h.append("<tr><td colspan='6' style='background:#374151;color:#ffffff;font-weight:600'>"
-                         "%s</td></tr>" % STAGE_TITLES.get(stg, stg))
+                h.append("<tr><td colspan='6' style='background:var(--primary);color:#ffffff;font-weight:600;'>%s</td></tr>" % STAGE_TITLES.get(stg, stg))
             rows = [r for r in done if r["id"].split("-")[0] == cid]
             if rows:
                 for r in rows:
-                    rb = "<span class='badge-pass'>PASS</span>"
-                    if r["status"] == "FAIL": rb = "<span class='badge-fail'>FAIL</span>"
-                    elif r["status"] in ("INFO","ERROR"): rb = "<span class='badge-info'>%s</span>" % r["status"]
-                    h.append("<tr><td>%s</td><td>%s</td><td>Yes</td><td>%s</td><td><code>%s</code></td><td>%s</td></tr>"
+                    rb = "<span class='badge badge-pass'>PASS</span>"
+                    if r["status"] == "FAIL": rb = "<span class='badge badge-fail'>FAIL</span>"
+                    elif r["status"] in ("INFO","ERROR"): rb = "<span class='badge badge-medium'>%s</span>" % r["status"]
+                    h.append("<tr><td>%s</td><td>%s</td><td>Yes</td><td>%s</td><td><code class='inline'>%s</code></td><td>%s</td></tr>"
                              % (cid, esc(name), rb, esc(r["target"]), esc(r["detail"])))
             else:
-                h.append("<tr style='background:#fafafa'><td style='color:#9ca3af'>%s</td><td style='color:#9ca3af'>%s</td><td style='color:#9ca3af'>No</td>"
-                         "<td><span class='badge-not'>UNCHECKED</span></td><td>-</td><td style='color:#9ca3af'>Manual verification required</td></tr>"
+                h.append("<tr style='background:#fafafa;'><td style='color:#94a3b8;'>%s</td><td style='color:#94a3b8;'>%s</td><td style='color:#94a3b8;'>No</td>"
+                         "<td><span class='badge badge-unchecked'>UNCHECKED</span></td><td>-</td><td style='color:#94a3b8;'>Manual verification required</td></tr>"
                          % (cid, esc(name)))
-        h.append("</table>")
-        
-        h.append("<p style='margin-top:32px;font-size:12px;color:#9ca3af;text-align:center'>"
-                 "SSO Scanner Burp Extension &middot; Automated & Semi-Automated SSO Vulnerability Assessment</p>")
+        h.append("</tbody></table></section>")
+
+        h.append("</div>")
+        h.append("<footer class='footer'>Confidential Offensive Security Assessment Report &middot; Generated by Burp Suite SSO Scanner</footer>")
         h.append("</div></body></html>")
         return "".join(h)

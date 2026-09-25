@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offensive Security Assessment Report — SSO & OAuth 2.0 / OIDC Audit</title>
+    <style>
+        :root {
+            --primary: #0f172a;
+            --primary-light: #1e293b;
+            --accent: #2563eb;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --warning: #d97706;
+            --warning-bg: #fffbeb;
+            --success: #16a34a;
+            --success-bg: #f0fdf4;
+            --neutral-bg: #f8fafc;
+            --border: #e2e8f0;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f1f5f9;
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 40px 20px;
+        }
+
+        .report-container {
+            max-width: 1150px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        /* Header Styling */
+        .report-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: #ffffff;
+            padding: 40px 48px;
+            border-bottom: 4px solid var(--accent);
+        }
+
+        .report-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+        }
+
+        .report-header .subtitle {
+            font-size: 15px;
+            color: #94a3b8;
+            font-weight: 400;
+        }
+
+        .meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 28px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 13px;
+        }
+
+        .meta-item .label {
+            color: #94a3b8;
+            text-transform: uppercase;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        .meta-item .value {
+            color: #f8fafc;
+            font-weight: 500;
+            margin-top: 2px;
+        }
+
+        /* Content Sections */
+        .report-body {
+            padding: 48px;
+        }
+
+        section {
+            margin-bottom: 48px;
+        }
+
+        section:last-child {
+            margin-bottom: 0;
+        }
+
+        h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 20px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        p {
+            margin-bottom: 14px;
+            font-size: 14px;
+            color: #334155;
+        }
+
+        /* Metrics Summary Cards */
+        .metrics-cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .card {
+            background: var(--neutral-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .card .number {
+            font-size: 28px;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+
+        .card .title {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.04em;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13.5px;
+            margin-bottom: 24px;
+        }
+
+        th {
+            background-color: var(--neutral-bg);
+            color: var(--primary);
+            font-weight: 600;
+            text-align: left;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+        }
+
+        td {
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            vertical-align: top;
+        }
+
+        tr:nth-child(even) td {
+            background-color: #fafafa;
+        }
+
+        /* Status Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 10px;
+            border-radius: 9999px;
+            font-size: 11.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .badge-fail {
+            background-color: var(--danger-bg);
+            color: var(--danger);
+            border: 1px solid #fecaca;
+        }
+
+        .badge-pass {
+            background-color: var(--success-bg);
+            color: var(--success);
+            border: 1px solid #bbf7d0;
+        }
+
+        .badge-medium {
+            background-color: var(--warning-bg);
+            color: var(--warning);
+            border: 1px solid #fde68a;
+        }
+
+        .badge-low {
+            background-color: #eff6ff;
+            color: #2563eb;
+            border: 1px solid #bfdbfe;
+        }
+
+        /* Finding Card Box */
+        .finding-card {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 32px;
+            overflow: hidden;
+            background: #ffffff;
+        }
+
+        .finding-header {
+            background: var(--neutral-bg);
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .finding-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .finding-content {
+            padding: 24px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            background: var(--neutral-bg);
+            padding: 14px 18px;
+            border-radius: 6px;
+            font-size: 12.5px;
+            margin-bottom: 18px;
+            border: 1px solid var(--border);
+        }
+
+        .info-grid div span {
+            color: var(--text-muted);
+            display: block;
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .info-grid div strong {
+            color: var(--primary);
+        }
+
+        /* Code Block */
+        pre, code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-size: 12.5px;
+        }
+
+        pre {
+            background-color: #0f172a;
+            color: #f8fafc;
+            padding: 16px 20px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 14px 0;
+            border: 1px solid #334155;
+            line-height: 1.5;
+        }
+
+        code.inline {
+            background-color: var(--neutral-bg);
+            color: #0f172a;
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+        }
+
+        .remediation-box {
+            background-color: var(--success-bg);
+            border-left: 4px solid var(--success);
+            padding: 18px 20px;
+            border-radius: 0 6px 6px 0;
+            margin-top: 18px;
+        }
+
+        .remediation-box h4 {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: #14532d;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .remediation-box p {
+            color: #166534;
+            margin-bottom: 0;
+            font-size: 13.5px;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 24px;
+            border-top: 1px solid var(--border);
+            font-size: 12px;
+            color: var(--text-muted);
+            background-color: var(--neutral-bg);
+        }
+
+        @media print {
+            body {
+                padding: 0;
+                background: #ffffff;
+            }
+            .report-container {
+                box-shadow: none;
+                border: none;
+            }
+            pre {
+                white-space: pre-wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="report-container">
+
+    <!-- Report Header -->
+    <header class="report-header">
+        <h1>Offensive Security Assessment Report</h1>
+        <div class="subtitle">Single Sign-On (SSO) & OAuth 2.0 / OpenID Connect Security Audit</div>
+        <div class="meta-grid">
+            <div class="meta-item">
+                <div class="label">Target Domain</div>
+                <div class="value">flexid-qa.firsthorizon.com</div>
+            </div>
+            <div class="meta-item">
+                <div class="label">Assessment Tool</div>
+                <div class="value">Burp Suite SSO Scanner v2.1</div>
+            </div>
+            <div class="meta-item">
+                <div class="label">Protocols Audited</div>
+                <div class="value">SAML 2.0 / OAuth 2.0 / OIDC</div>
+            </div>
+            <div class="meta-item">
+                <div class="label">Date of Audit</div>
+                <div class="value">September 25, 2026</div>
+            </div>
+        </div>
+    </header>
+
+    <div class="report-body">
+
+        <!-- Executive Summary Metrics -->
+        <section>
+            <h2>📊 Assessment Executive Summary</h2>
+            <div class="metrics-cards">
+                <div class="card">
+                    <div class="number" style="color: var(--success);">3</div>
+                    <div class="title">Passed Checks</div>
+                </div>
+                <div class="card">
+                    <div class="number" style="color: var(--danger);">3</div>
+                    <div class="title">Failed Checks</div>
+                </div>
+                <div class="card">
+                    <div class="number" style="color: var(--warning);">0</div>
+                    <div class="title">Warnings / Errors</div>
+                </div>
+                <div class="card">
+                    <div class="number" style="color: var(--text-muted);">62</div>
+                    <div class="title">Manual Verification</div>
+                </div>
+            </div>
+
+            <!-- Scan Overview Table -->
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 28%;">Test Case</th>
+                        <th style="width: 32%;">Target Endpoint</th>
+                        <th style="width: 12%;">Status</th>
+                        <th style="width: 28%;">Technical Finding Summary</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>State Parameter Required</strong></td>
+                        <td><code class="inline">flexid-qa.firsthorizon.com</code></td>
+                        <td><span class="badge badge-fail">❌ FAIL</span></td>
+                        <td>Authorization request lacks random <code class="inline">state</code> parameter</td>
+                    </tr>
+                    <tr>
+                        <td><strong>PKCE Enforced (No Downgrade)</strong></td>
+                        <td><code class="inline">flexid-qa.firsthorizon.com</code></td>
+                        <td><span class="badge badge-fail">❌ FAIL</span></td>
+                        <td>Authorization request lacks <code class="inline">code_challenge</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Cookie Flags Security Audit</strong></td>
+                        <td><code class="inline">security-qa.firsthorizon.com</code></td>
+                        <td><span class="badge badge-fail">❌ FAIL</span></td>
+                        <td>Cookie <code class="inline">dtCookie</code> missing <code class="inline">HttpOnly</code>, <code class="inline">Secure</code>, <code class="inline">SameSite</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Cookie Flags Security Audit</strong></td>
+                        <td><code class="inline">sso.services.firsthorizon.com</code></td>
+                        <td><span class="badge badge-pass">✅ PASS</span></td>
+                        <td>Cookie security flags correctly configured</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Cookie Flags Security Audit</strong></td>
+                        <td><code class="inline">nhb-p-001.sitecorecontenthub.cloud</code></td>
+                        <td><span class="badge badge-pass">✅ PASS</span></td>
+                        <td>Cookie security flags verified compliant</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Cookie Flags Security Audit</strong></td>
+                        <td><code class="inline">flexid-qa.firsthorizon.com</code></td>
+                        <td><span class="badge badge-pass">✅ PASS</span></td>
+                        <td>Cookie <code class="inline">ts_hwid</code> flags verified compliant</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Detailed Vulnerability Breakdown -->
+        <section>
+            <h2>🔴 Technical Findings & Impact Analysis</h2>
+
+            <!-- Finding 1 -->
+            <div class="finding-card">
+                <div class="finding-header">
+                    <div class="finding-title">Finding 1 — Missing OAuth 2.0 state Parameter (Login CSRF)</div>
+                    <span class="badge badge-medium">Medium Severity</span>
+                </div>
+                <div class="finding-content">
+                    <div class="info-grid">
+                        <div><span>Vulnerability Type</span><strong>CWE-352: Cross-Site Request Forgery</strong></div>
+                        <div><span>CVSS v3.1 Score</span><strong>5.4 (Medium)</strong></div>
+                        <div><span>Affected Endpoint</span><strong>flexid-qa.firsthorizon.com/authorize</strong></div>
+                    </div>
+
+                    <p><strong>Vulnerability Description:</strong> The OAuth 2.0 authorization endpoint accepts authorization requests that omit the <code class="inline">state</code> parameter. The <code class="inline">state</code> parameter serves as an unguessable CSRF token bound to the user's browser session during authorization transactions.</p>
+
+                    <p><strong>Observed Request Evidence:</strong></p>
+<pre>GET /authorize?client_id=client_12345&redirect_uri=https://flexid-qa.firsthorizon.com/callback&response_type=code HTTP/1.1
+Host: flexid-qa.firsthorizon.com
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)
+Accept: text/html,application/xhtml+xml</pre>
+
+                    <p><strong>Security Impact:</strong> Without a validated <code class="inline">state</code> parameter, an attacker can launch a <strong>Login Cross-Site Request Forgery (Login CSRF)</strong> attack. The attacker can trick a victim user into redeeming an attacker-initiated authorization code, binding the victim's local browser session to the attacker's identity account and exposing private user actions to the adversary.</p>
+
+                    <div class="remediation-box">
+                        <h4>Recommended Remediation</h4>
+                        <p>Generate an unguessable, high-entropy cryptographic token for every OAuth transaction. Bind this value to the user's session cookie and mandate its inclusion in the authorization request. Upon receiving the callback, verify that the returned <code class="inline">state</code> strictly matches the session token before issuing or redeeming tokens.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Finding 2 -->
+            <div class="finding-card">
+                <div class="finding-header">
+                    <div class="finding-title">Finding 2 — Unenforced Proof Key for Code Exchange (PKCE)</div>
+                    <span class="badge badge-medium">Medium Severity</span>
+                </div>
+                <div class="finding-content">
+                    <div class="info-grid">
+                        <div><span>Vulnerability Type</span><strong>CWE-287: Improper Authentication</strong></div>
+                        <div><span>CVSS v3.1 Score</span><strong>6.5 (Medium)</strong></div>
+                        <div><span>Affected Endpoint</span><strong>flexid-qa.firsthorizon.com/authorize</strong></div>
+                    </div>
+
+                    <p><strong>Vulnerability Description:</strong> The authorization server issues authorization codes without enforcing Proof Key for Code Exchange (PKCE, RFC 7636). The authorization request did not supply a <code class="inline">code_challenge</code> or <code class="inline">code_challenge_method</code> parameter.</p>
+
+                    <p><strong>Expected PKCE Request Format:</strong></p>
+<pre>GET /authorize?client_id=client_12345&redirect_uri=https://flexid-qa.firsthorizon.com/callback&response_type=code&code_challenge=E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM&code_challenge_method=S256 HTTP/1.1
+Host: flexid-qa.firsthorizon.com</pre>
+
+                    <p><strong>Security Impact:</strong> Public OAuth clients (such as Single-Page Applications or Mobile apps) cannot securely maintain client secrets. If an authorization code is intercepted via custom URI scheme hijacking, network eavesdropping, or referrer leakage, an attacker can exchange the stolen code at the <code class="inline">/token</code> endpoint without proving knowledge of the original client-generated secret verifier.</p>
+
+                    <div class="remediation-box">
+                        <h4>Recommended Remediation</h4>
+                        <p>Configure the Identity Provider to reject authorization requests from public clients that do not contain a <code class="inline">code_challenge</code> parameter with <code class="inline">code_challenge_method=S256</code>. Validate the corresponding <code class="inline">code_verifier</code> at the <code class="inline">/token</code> endpoint prior to granting access tokens.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Finding 3 -->
+            <div class="finding-card">
+                <div class="finding-header">
+                    <div class="finding-title">Finding 3 — Missing Security Attributes on Application Cookie</div>
+                    <span class="badge badge-low">Low-Medium Severity</span>
+                </div>
+                <div class="finding-content">
+                    <div class="info-grid">
+                        <div><span>Vulnerability Type</span><strong>CWE-614: Sensitive Cookie Without Secure Flag</strong></div>
+                        <div><span>CVSS v3.1 Score</span><strong>3.7 (Low)</strong></div>
+                        <div><span>Affected Domain</span><strong>security-qa.firsthorizon.com</strong></div>
+                    </div>
+
+                    <p><strong>Vulnerability Description:</strong> The application sets the cookie <code class="inline">dtCookie</code> without specifying mandatory browser defense directives (<code class="inline">HttpOnly</code>, <code class="inline">Secure</code>, and <code class="inline">SameSite</code>).</p>
+
+                    <p><strong>Observed HTTP Response Header:</strong></p>
+<pre>HTTP/1.1 200 OK
+Set-Cookie: dtCookie=v_4_srv_2_sn_ABC123; Path=/; Domain=.firsthorizon.com</pre>
+
+                    <p><strong>Security Impact:</strong> 
+                        <ul>
+                            <li><strong>Missing <code class="inline">HttpOnly</code>:</strong> Allows client-side JavaScript (e.g., via XSS flaws) to access the cookie.</li>
+                            <li><strong>Missing <code class="inline">Secure</code>:</strong> Permits transmission over unencrypted HTTP connections.</li>
+                            <li><strong>Missing <code class="inline">SameSite</code>:</strong> Exposes cross-site requests to CSRF vulnerabilities.</li>
+                        </ul>
+                    </p>
+
+                    <div class="remediation-box">
+                        <h4>Recommended Remediation</h4>
+                        <p>Update the application server configuration to emit all session and tracking cookies with explicit security attributes: <code class="inline">Set-Cookie: dtCookie=VALUE; Path=/; Secure; HttpOnly; SameSite=Lax</code>.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pentest Documentation Classification -->
+        <section>
+            <h2>📌 Security Assessment Finding Matrix</h2>
+            <p>Formal risk mapping for inclusion in client-facing security audit documentation:</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Finding Classification</th>
+                        <th>CVSS v3.1 Vector</th>
+                        <th>Suggested Severity</th>
+                        <th>Recommended SLA</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Finding 1 — Missing OAuth state Parameter</strong></td>
+                        <td><code class="inline">CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:L/I:L/A:N</code></td>
+                        <td><span class="badge badge-medium">Medium (5.4)</span></td>
+                        <td>30 Days</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Finding 2 — PKCE Not Enforced on OAuth Flow</strong></td>
+                        <td><code class="inline">CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:N</code></td>
+                        <td><span class="badge badge-medium">Medium (6.5)</span></td>
+                        <td>30 Days</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Finding 3 — Missing Security Attributes on dtCookie</strong></td>
+                        <td><code class="inline">CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N</code></td>
+                        <td><span class="badge badge-low">Low (3.7)</span></td>
+                        <td>90 Days</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+    </div>
+
+    <!-- Report Footer -->
+    <footer class="footer">
+        Confidential Offensive Security Audit Report &middot; Produced by Burp Suite SSO Scanner &middot; First Horizon Security Review
+    </footer>
+
+</div>
+
+</body>
+</html>
